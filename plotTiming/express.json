@@ -1,0 +1,56 @@
+[
+    {
+        "boxes": 4,
+        "length": 100,
+        "writeMS": 15.28,
+        "readMS": 31.03 
+    },
+    {
+        "boxes": 32,
+        "length": 100,
+        "writeMS": 15.10,
+        "readMS": 33.13 
+    },
+    {
+        "boxes": 256,
+        "length": 100,
+        "writeMS": 18.79,
+        "readMS": 31.41 
+    },
+    {
+        "boxes": 2048,
+        "length": 100,
+        "writeMS": 34.35,
+        "readMS": 31.80 
+    },
+    {
+        "boxes": 16384,
+        "length": 100,
+        "writeMS": 132.39,
+        "readMS": 40.57 
+    },
+    {
+        "boxes": 131072,
+        "length": 100,
+        "writeMS": 888.94,
+        "readMS": 77.62
+    },
+    {
+        "boxes": 262144,
+        "length": 100,
+        "writeMS": 1757.14,
+        "readMS": 126.366
+    },
+    {
+        "boxes": 524288,
+        "length": 100,
+        "writeMS": 3538.03,
+        "readMS": 212.40
+    },
+    {
+        "boxes": 1000000,
+        "length": 100,
+        "writeMS": 6628.97,
+        "readMS": 368.91
+    }
+]

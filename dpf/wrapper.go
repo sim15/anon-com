@@ -92,7 +92,7 @@ func (vdpf *Vdpf) GenVDPFKeys(specialIndex uint64, rangeSize uint) (*DPFKey, *DP
 	return NewDPFKey(k0, rangeSize, 0), NewDPFKey(k1, rangeSize, 1)
 }
 
-func (dpf *Dpf) BatchEval(key *DPFKey, indices []uint64) []byte {
+func (dpf *Dpf) BatchEval(key *DPFKey, indices []uint64) []uint64 {
 
 	keySize := getRequiredKeySize(key.RangeSize)
 	if len(key.Bytes) != int(keySize) {
@@ -100,7 +100,9 @@ func (dpf *Dpf) BatchEval(key *DPFKey, indices []uint64) []byte {
 	}
 
 	res := make([]uint64, len(indices)*2) // returned output is uint128_t
-	resBytes := make([]byte, len(indices))
+	// resBytes := make([]byte, len(indices))
+
+	// resShort := make([]uint64, len(indices))
 
 	C.batchEvalDPF(
 		dpf.ctx,
@@ -113,13 +115,11 @@ func (dpf *Dpf) BatchEval(key *DPFKey, indices []uint64) []byte {
 	)
 
 	// skip two uint64 blocks at a time
-	b := 0
-	for i := 0; i < len(res); i += 2 {
-		resBytes[b] = byte(res[i] & 1)
-		b++
-	}
+	// for i := 0; i < len(res); i += 2 {
+	// 	resShort[i/2] = res[i]
+	// }
 
-	return resBytes
+	return res
 
 }
 

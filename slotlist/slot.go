@@ -15,7 +15,8 @@ type Slot struct {
 
 type ExpressSlot struct {
 	*Slot
-	DecryptionKey *big.Int //temporary
+	VirtualAddress uint64   // technically should be up to 128 bits, but for testing 64 is fine
+	DecryptionKey  *big.Int // temporary
 }
 
 type SpossSlot struct {

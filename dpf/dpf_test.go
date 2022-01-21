@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-const numTrials = 10
+const numTrials = 1
 
 func TestCorrectPointFunctionTwoServer(t *testing.T) {
 
 	for trial := 0; trial < numTrials; trial++ {
-		num := 1 << 15
+		num := 1 << 3
 
 		specialIndex := uint64(rand.Intn(num))
 
@@ -20,7 +20,7 @@ func TestCorrectPointFunctionTwoServer(t *testing.T) {
 		client := ClientDPFInitialize()
 
 		// fmt.Printf("index  %v\n", specialIndex)
-		keyA, keyB := client.GenDPFKeys(specialIndex, 64)
+		keyA, keyB := client.GenDPFKeys(specialIndex, 128)
 
 		// fmt.Printf("keyA = %v\n", keyA)
 		// fmt.Printf("keyB = %v\n", keyB)
@@ -35,10 +35,18 @@ func TestCorrectPointFunctionTwoServer(t *testing.T) {
 		ans0 := server.BatchEval(keyA, indices)
 		ans1 := server.BatchEval(keyB, indices)
 
-		// fmt.Printf("ans0 = %v\n", ans0)
-		// fmt.Printf("ans1 = %v\n", ans1)
+		fmt.Printf("ans0 = %v\n", ans0)
+		fmt.Printf("ans1 = %v\n", ans1)
+		fmt.Printf("spec index: %v\n", specialIndex)
 		for i := 0; i < num; i++ {
 
+			if (ans0[i] == ans1[i]) && (indices[i] == specialIndex) {
+				t.Fatalf("Index %v \n Values: \n %v \n %v \n", i, ans0[i], ans1[i])
+			}
+
+			if (ans0[i] != ans1[i]) && (indices[i] != specialIndex) {
+				t.Fatalf("Index %v \n Values: \n %v \n %v \n", i, ans0[i], ans1[i])
+			}
 			// fmt.Printf("ans0 = %v\n", ans0[i])
 			// fmt.Printf("ans1 = %v\n", ans1[i])
 

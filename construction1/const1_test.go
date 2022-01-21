@@ -10,8 +10,8 @@ import (
 	"github.com/sim15/anon-com/sposs"
 )
 
-const mSize = 1000 // in bytes
-const NumMailboxes = 10
+const mSize = 160 // in bytes
+const NumMailboxes = 1 << 15
 const NumQueries = 100
 
 func TestMessageEncode(t *testing.T) {
@@ -188,10 +188,8 @@ func BenchmarkClientAuthWrite(b *testing.B) {
 
 	query := c.NewClientQuery(0, NumMailboxes, x)
 
-	// sA.StartSession(query[0])
 	sB.StartSession(query[1])
 
-	// sA.ComputePrepareAuthAudit()
 	sB.ComputePrepareAuthAudit()
 	rand := sA.Boxes.ProofParams.Group.Field.RandomElement()
 	sB.Boxes.ProofParams.SetRandSeed(rand)
@@ -218,7 +216,7 @@ func BenchmarkClientAuthWrite(b *testing.B) {
 			false)
 
 		sA.Boxes.ProofParams.VerifyAudit(pubVerificationShareA, privVerificationShareA)
-		sA.WriteShare()
+		// sA.WriteShare()
 	}
 
 }
