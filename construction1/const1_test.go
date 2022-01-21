@@ -10,8 +10,8 @@ import (
 	"github.com/sim15/anon-com/sposs"
 )
 
-const mSize = 5
-const NumMailboxes = 512
+const mSize = 1000 // in bytes
+const NumMailboxes = 10
 const NumQueries = 100
 
 func TestMessageEncode(t *testing.T) {
@@ -71,11 +71,11 @@ func TestFullClientAuth(t *testing.T) {
 	serverTestX := big.NewInt(4)
 	serverTestAltX := pp.ExpField.Add(pp.ExpField.NewElement(serverTestX), q).Int
 
-	sA := NewServer(false, mSize, NumMailboxes, pp)
-	sB := NewServer(true, mSize, NumMailboxes, pp)
+	sA := NewSpossServer(false, mSize, NumMailboxes, pp)
+	sB := NewSpossServer(true, mSize, NumMailboxes, pp)
 
-	sA.InitTestSlotList(group.NewElement(serverTestX))
-	sB.InitTestSlotList(group.NewElement(serverTestAltX))
+	sA.InitTestSpossSlotList(group.NewElement(serverTestX))
+	sB.InitTestSpossSlotList(group.NewElement(serverTestAltX))
 
 	for i := 0; i < NumQueries; i++ {
 
@@ -98,12 +98,6 @@ func TestFullClientAuth(t *testing.T) {
 
 		sA.ComputePrepareAuthAudit()
 		sB.ComputePrepareAuthAudit()
-
-		// fmt.Printf("%v\n", sA.SPOSSKeys[0].Value.Int)
-		// fmt.Printf("%v		%v\n", sA.CurrentSession.Pfbits, sA.CurrentSession.PfShare)
-		// fmt.Printf("%v		%v\n", sB.CurrentSession.Pfbits, sB.CurrentSession.PfShare)
-		// fmt.Println(sA.CurrentSession.QueryShare.Share)
-		// fmt.Println(sB.CurrentSession.QueryShare.Share)
 
 		if !bytes.Equal(sA.CurrentSession.QueryShare.Pi, sB.CurrentSession.QueryShare.Pi) {
 			t.Fatalf("pi0 =/= p1: Got: %v and %v", sA.CurrentSession.QueryShare.Pi, sB.CurrentSession.QueryShare.Pi)
@@ -133,16 +127,7 @@ func TestFullClientAuth(t *testing.T) {
 		sA.Boxes.ProofParams.SetRandSeed(rand)
 		sB.Boxes.ProofParams.SetRandSeed(rand)
 
-		// fmt.Println(c.ProofPP.Group.NewElement(x).Value.Int)
-		// fmt.Println(recoveredSPOSSkey.Int)
-		// fmt.Println(c.ProofPP.RandSeed)
-		// fmt.Println(sB.Boxes.ProofParams.RandSeed)
-		// fmt.Println(sA.CurrentSession.QueryShare.Share)
-		// fmt.Println(sB.CurrentSession.QueryShare.Share)
-		// fmt.Println(sA.CurrentSession.RecievedQuery.SPoSSProof)
-		// fmt.Println(sB.CurrentSession.RecievedQuery.SPoSSProof)
-
-		// setp 1 of sposs
+		// step 1 of sposs
 		pubAuditShareA, privAuditShareA := sA.Boxes.ProofParams.PrepareAudit(
 			sA.CurrentSession.RecievedQuery.SPoSSProof,
 			sA.CurrentSession.QueryShare.Share,
@@ -174,3 +159,68 @@ func TestFullClientAuth(t *testing.T) {
 	}
 
 }
+
+func BenchmarkClientAuthWrite(b *testing.B) {
+	group, q := DefaultSetup()
+
+	pp := sposs.NewPublicParams(group)
+
+	serverTestX := big.NewInt(4)
+	serverTestAltX := pp.ExpField.Add(pp.ExpField.NewElement(serverTestX), q).Int
+
+	sA := NewSpossServer(false, mSize, NumMailboxes, pp)
+	sB := NewSpossServer(true, mSize, NumMailboxes, pp)
+
+	sA.InitTestSpossSlotList(group.NewElement(serverTestX))
+	sB.InitTestSpossSlotList(group.NewElement(serverTestAltX))
+
+	x := pp.ExpField.RandomElement().Int
+	altX := pp.ExpField.Add(pp.ExpField.NewElement(x), q).Int
+
+	sA.Boxes.Slots[0].SPOSSKey = pp.Group.NewElement(x)
+	sB.Boxes.Slots[0].SPOSSKey = pp.Group.NewElement(altX)
+
+	sA.SPOSSKeys[0] = pp.Group.NewElement(x)
+	sB.SPOSSKeys[0] = pp.Group.NewElement(altX)
+
+	message := []byte{101, 100}
+	c := NewClient(pp, x, mSize, message)
+
+	query := c.NewClientQuery(0, NumMailboxes, x)
+
+	// sA.StartSession(query[0])
+	sB.StartSession(query[1])
+
+	// sA.ComputePrepareAuthAudit()
+	sB.ComputePrepareAuthAudit()
+	rand := sA.Boxes.ProofParams.Group.Field.RandomElement()
+	sB.Boxes.ProofParams.SetRandSeed(rand)
+
+	pubAuditShareB, _ := sB.Boxes.ProofParams.PrepareAudit(
+		sB.CurrentSession.RecievedQuery.SPoSSProof,
+		sB.CurrentSession.QueryShare.Share,
+		true)
+
+	for i := 0; i < b.N; i++ {
+		sA.StartSession(query[0])
+		sA.ComputePrepareAuthAudit()
+
+		sA.Boxes.ProofParams.SetRandSeed(rand)
+
+		_, privAuditShareA := sA.Boxes.ProofParams.PrepareAudit(
+			sA.CurrentSession.RecievedQuery.SPoSSProof,
+			sA.CurrentSession.QueryShare.Share,
+			false)
+
+		pubVerificationShareA, privVerificationShareA := sA.Boxes.ProofParams.Audit(
+			pubAuditShareB, //for benchmark
+			privAuditShareA,
+			false)
+
+		sA.Boxes.ProofParams.VerifyAudit(pubVerificationShareA, privVerificationShareA)
+		sA.WriteShare()
+	}
+
+}
+
+// should also clear slot when read. use dpf to xor current slot with

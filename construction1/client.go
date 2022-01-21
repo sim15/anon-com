@@ -11,7 +11,7 @@ import (
 
 type Client struct {
 	ProofPP     *sposs.PublicParams
-	MessageSize int64
+	MessageSize uint64
 	x           *big.Int
 	m           []byte
 }
@@ -26,7 +26,7 @@ type ClientQuery struct {
 	SPoSSProof  *sposs.ProofShare
 }
 
-func NewClient(pp *sposs.PublicParams, xVal *big.Int, mSize int64, message []byte) *Client {
+func NewClient(pp *sposs.PublicParams, xVal *big.Int, mSize uint64, message []byte) *Client {
 	return &Client{
 		ProofPP:     pp,
 		x:           xVal,

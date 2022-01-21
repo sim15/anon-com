@@ -9,7 +9,7 @@ import (
 type Slot struct {
 	PhysicalAddress uint64
 	// VirtualAddress  *big.int
-	SPOSSKey  *algebra.GroupElement
+	// SPOSSKey  *algebra.GroupElement
 	DataShare []byte
 }
 
@@ -18,12 +18,17 @@ type ExpressSlot struct {
 	DecryptionKey *big.Int //temporary
 }
 
-func (sl *SlotList) NewSlot(phys uint64, gx *algebra.GroupElement) *Slot {
-	return &Slot{
-		phys,
-		// virtual,
-		gx.Copy(),
-		make([]byte, sl.SlotSize)}
+type SpossSlot struct {
+	*Slot
+	SPOSSKey *algebra.GroupElement
+}
+
+func (sl *SlotList) NewSpossSlot(phys uint64, gx *algebra.GroupElement) *SpossSlot {
+	return &SpossSlot{
+		&Slot{
+			phys,
+			make([]byte, sl.SlotSize)},
+		gx.Copy()}
 }
 
 func XorSlots(a, b *Slot) {
@@ -35,6 +40,19 @@ func XorSlots(a, b *Slot) {
 	} else {
 		for j := 0; j < len(b.DataShare); j++ {
 			a.DataShare[j] ^= b.DataShare[j]
+		}
+	}
+}
+
+func XorToSlot(a *Slot, b []byte) {
+
+	if len(a.DataShare) < len(b) {
+		for j := 0; j < len(a.DataShare); j++ {
+			a.DataShare[j] ^= b[j]
+		}
+	} else {
+		for j := 0; j < len(b); j++ {
+			a.DataShare[j] ^= b[j]
 		}
 	}
 }
@@ -54,4 +72,13 @@ func XorByteArray(a, b []byte) []byte {
 		}
 		return res
 	}
+}
+
+func (sl *Slot) WriteMessageToSlot(maskedMessage []byte, slotSize uint64, prgKey int64, bit bool) {
+
+	if bit {
+		XorToSlot(sl, PRG(prgKey, slotSize))
+	}
+
+	XorToSlot(sl, maskedMessage)
 }

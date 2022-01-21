@@ -10,12 +10,18 @@ import (
 type SlotList struct {
 	ProofParams *sposs.PublicParams
 	SlotSize    uint64
-	Slots       []*Slot
+	// Slots       []*Slot
 }
 
-func NewSlotList(pp *sposs.PublicParams, size, numSlots uint64) *SlotList {
-	return &SlotList{
-		pp,
-		size,
-		make([]*Slot, numSlots)}
+type SpossSlotList struct {
+	*SlotList
+	Slots []*SpossSlot
+}
+
+func NewSpossSlotList(pp *sposs.PublicParams, size, numSlots uint64) *SpossSlotList {
+	return &SpossSlotList{
+		&SlotList{
+			pp,
+			size},
+		make([]*SpossSlot, numSlots)}
 }
