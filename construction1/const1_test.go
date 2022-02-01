@@ -2,7 +2,10 @@ package construction1
 
 import (
 	"bytes"
+	"encoding/gob"
+	"fmt"
 	"math/big"
+	"math/rand"
 	"testing"
 
 	"github.com/sim15/anon-com/dpf"
@@ -10,8 +13,10 @@ import (
 	"github.com/sim15/anon-com/sposs"
 )
 
-const mSize = 160 // in bytes
-const NumMailboxes = 1 << 15
+const mSize = 100 // in bytes
+// const NumMailboxes = 1 << (8 * 8)
+const NumMailboxes = 30
+
 const NumQueries = 100
 
 func TestMessageEncode(t *testing.T) {
@@ -222,3 +227,43 @@ func BenchmarkClientAuthWrite(b *testing.B) {
 }
 
 // should also clear slot when read. use dpf to xor current slot with
+
+func BenchmarkClientCommunication(b *testing.B) {
+	group, _ := DefaultSetup()
+
+	pp := sposs.NewPublicParams(group)
+
+	x := pp.ExpField.RandomElement().Int
+
+	message := make([]byte, mSize)
+	rand.Read(message)
+	c := NewClient(pp, x, mSize, message)
+	quer := c.NewClientQuery(0, NumMailboxes, x)
+	fmt.Println("---")
+	fmt.Printf("%v\n", getSizeInBytes(quer))
+
+	fmt.Printf("%v - %v\n", getSizeInBytes(quer[0]), getSizeInBytes(quer[1]))
+	fmt.Printf("%v   %v\n", getSizeInBytes(quer[0].MaskedM), getSizeInBytes(quer[1].MaskedM))
+	fmt.Printf("%v   %v\n", getSizeInBytes(quer[0].DPFKey), getSizeInBytes(quer[1].DPFKey))
+	fmt.Printf("%v   %v\n", getSizeInBytes(quer[0].HKey1), getSizeInBytes(quer[1].HKey1))
+	fmt.Printf("%v   %v\n", getSizeInBytes(quer[0].HKey2), getSizeInBytes(quer[1].HKey2))
+	fmt.Printf("%v   %v\n", getSizeInBytes(quer[0].SPoSSProof), getSizeInBytes(quer[1].SPoSSProof))
+	fmt.Println("---")
+
+	for i := 0; i < b.N; i++ {
+		// buf.Reset()
+		c.NewClientQuery(0, NumMailboxes, x)
+		b.ReportAllocs()
+	}
+}
+
+func getSizeInBytes(s interface{}) int64 {
+	var b bytes.Buffer        // Stand-in for a network connection
+	enc := gob.NewEncoder(&b) // Will write to network.
+	err := enc.Encode(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return int64(len(b.Bytes()))
+}
