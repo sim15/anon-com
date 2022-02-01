@@ -17,10 +17,10 @@ var pp = sposs.NewPublicParams(group)
 
 func main() {
 
-	NUM_ACCOUNTS := []uint64{1 << 2, 1 << 5, 1 << 8, 1 << 11, 1 << 14, 1 << 17, 1 << 18, 1 << 19, 1 << 20}
-	// NUM_ACCOUNTS := []uint64{1 << 12, 1 << 15}
-	MESSAGE_SIZE := []uint64{50, 100, 300, 500, 750, 1000}
-	// MESSAGE_SIZE := []uint64{50, 160}
+	// NUM_ACCOUNTS := []uint64{1 << 2, 1 << 5, 1 << 8, 1 << 11, 1 << 14, 1 << 17, 1 << 18, 1 << 19, 1 << 20}
+	NUM_ACCOUNTS := []uint64{1 << 14}
+	// MESSAGE_SIZE := []uint64{50, 100, 300, 500, 750, 1000}
+	MESSAGE_SIZE := []uint64{1000}
 	NUM_TRIALS := 10
 
 	// var experiment Experiment
