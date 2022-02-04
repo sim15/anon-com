@@ -10,3 +10,6 @@ func PRG(seed int64, size uint64) []byte {
 	rand.Read(res)
 	return res
 }
+
+// add prg data to clients and servers. store its size and initial state
+func PRGAES(c)
