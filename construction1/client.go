@@ -1,6 +1,7 @@
 package construction1
 
 import (
+	"math"
 	"math/big"
 
 	"github.com/sim15/anon-com/dpf"
@@ -36,7 +37,7 @@ func NewClient(pp *sposs.PublicParams, xVal *big.Int, mSize uint64, message []by
 func (c *Client) NewClientQuery(idx, numBoxes uint64, x *big.Int) []*ClientQuery {
 	pf := dpf.ClientVDPFInitialize()
 	// TODO: uint(math.Ceil(math.Log2(float64(numBoxes))))
-	vdpfKeyA, vdpfKeyB := pf.GenVDPFKeys(idx, uint(numBoxes))
+	vdpfKeyA, vdpfKeyB := pf.GenVDPFKeys(idx, uint(math.Ceil(math.Log2(float64(numBoxes)))))
 
 	xVal := new(big.Int).Set(x)
 	resA, _, _ := pf.BatchVerEval(vdpfKeyA, []uint64{idx})

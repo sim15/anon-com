@@ -219,6 +219,7 @@ func (vdpf *Vdpf) FullDomainVerEval(key *DPFKey) ([]int64, []bool, []byte) {
 	resSize := 1 << key.RangeSize
 	pi := make([]byte, 64)
 
+	// TODO: FIX TO BE 128BIT OUTPUTS
 	res := make([]int64, resSize*2) // returned output is uint128_t
 	// resBytes := make([]byte, resSize)
 	resShort := make([]int64, resSize)

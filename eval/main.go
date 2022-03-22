@@ -18,9 +18,9 @@ var pp = sposs.NewPublicParams(group)
 func main() {
 
 	// NUM_ACCOUNTS := []uint64{1 << 2, 1 << 5, 1 << 8, 1 << 11, 1 << 14, 1 << 17, 1 << 18, 1 << 19, 1 << 20}
-	NUM_ACCOUNTS := []uint64{1 << 14}
-	// MESSAGE_SIZE := []uint64{50, 100, 300, 500, 750, 1000}
-	MESSAGE_SIZE := []uint64{1000}
+	NUM_ACCOUNTS := []uint64{1 << 14, 100000, 1 << 17}
+	// MESSAGE_SIZE := []uint64{100, 500, 1000}
+	MESSAGE_SIZE := []uint64{32000}
 	NUM_TRIALS := 10
 
 	// var experiment Experiment
@@ -83,9 +83,9 @@ func benchmarkConst1(numMailboxes, messageSize uint64) []int64 {
 	// -----------------------------------
 	start := time.Now()
 
-	query := c.NewClientQuery(0, numMailboxes, x) // TODO: nummailboxes will be constant in practice, so fix later
+	query := c.NewClientQuery(0, numMailboxes, x) // TODO: nummailboxes is constant in practice
 
-	timing[0] = time.Since(start).Milliseconds()
+	timing[0] = time.Since(start).Microseconds()
 	// -----------------------------------
 
 	sB.StartSession(query[1])
@@ -133,6 +133,6 @@ func benchmarkConst1(numMailboxes, messageSize uint64) []int64 {
 
 }
 
-func benchmarkExpress(numMailboxes, messageSize uint64) {
-	//  TODO: only consider messages of size 1000 bytes (1kb)
-}
+// func benchmarkExpress(numMailboxes, messageSize uint64) {
+// 	//  TODO: only consider messages of size 1000 bytes (1kb)
+// }

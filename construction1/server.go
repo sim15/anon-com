@@ -89,6 +89,7 @@ func (s *SpossServer) ComputePrepareAuthAudit() {
 
 func (s *SpossServer) WriteShare() {
 	for i := uint64(0); i < s.NumBoxes; i++ {
+
 		s.Boxes.Slots[i].WriteMessageToSlot(
 			s.CurrentSession.RecievedQuery.MaskedM,
 			s.Boxes.SlotSize,

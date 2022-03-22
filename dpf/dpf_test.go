@@ -105,11 +105,58 @@ func TestCorrectPointFunctionTwoServerFullDomain(t *testing.T) {
 	}
 }
 
+func TestCorrectPointFunctionTwoServerFullDomainVer(t *testing.T) {
+
+	for trial := 0; trial < numTrials; trial++ {
+
+		num := 4
+
+		specialIndex := uint64(rand.Intn(num))
+
+		// generate fss Keys on client
+		client := ClientVDPFInitialize()
+
+		// fmt.Printf("index  %v\n", specialIndex)
+		keyA, keyB := client.GenVDPFKeys(specialIndex, uint(num))
+
+		// fmt.Printf("keyA = %v\n", keyA)
+		// fmt.Printf("keyB = %v\n", keyB)
+
+		// simulate the server
+		server := ServerVDPFInitialize(client.PrfKey, client.H1Key, client.H2Key)
+
+		ans0, _, _ := server.FullDomainVerEval(keyA)
+		ans1, _, _ := server.FullDomainVerEval(keyB)
+
+		// fmt.Println(len(res0))
+		// fmt.Println(res0)
+		// fmt.Println(res1)
+
+		// fmt.Printf("ans0 = %v\n", ans0)
+		// fmt.Printf("ans1 = %v\n", ans1)
+		for i := 0; i < num; i++ {
+
+			// fmt.Printf("ans0 = %v\n", ans0[i])
+			// fmt.Printf("ans1 = %v\n", ans1[i])
+
+			sum := ans0[i] ^ ans1[i]
+
+			if uint64(i) == specialIndex && uint(sum) != 1 {
+				t.Fatalf("Expected: %v Got: %v", 1, sum)
+			}
+
+			if uint64(i) != specialIndex && sum != 0 {
+				t.Fatalf("Expected: 0 Got: %v", sum)
+			}
+		}
+	}
+}
+
 func TestCorrectVerifiablePointFunctionTwoServer(t *testing.T) {
 
 	for trial := 0; trial < numTrials; trial++ {
 		// num := rand.Intn(1 << 15)
-		num := 1 << 15
+		num := 1 << 2
 
 		specialIndex := uint64(rand.Intn(num))
 

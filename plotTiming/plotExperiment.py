@@ -48,13 +48,13 @@ with open('experiment1.json') as f:
 
     for experiment in data:
         n = int(math.log2(experiment["NumBoxes"]))
-        # if n > 5:
-        l = experiment["message_length"]
-        t = sum(statistics.mean(i) for i in experiment["construction1_ms"] ) / 1000
-        if not (l in valuesTime):
-            valuesTime[l] = []
+        if n > 0:
+            l = experiment["message_length"]
+            t = sum(statistics.mean(i) for i in [experiment["construction1_ms"][0]] ) / 1000
+            if not (l in valuesTime):
+                valuesTime[l] = []  
         
-        valuesTime[l].append(t)
+            valuesTime[l].append(t)
     
     # for l in valuesTime.keys():
     #     valuesTime[l].append((valuesTime[l][-1][0]+1, 0))

@@ -13,11 +13,11 @@ import (
 	"github.com/sim15/anon-com/sposs"
 )
 
-const mSize = 100 // in bytes
+const mSize = 1000 // in bytes
 // const NumMailboxes = 1 << (8 * 8)
-const NumMailboxes = 30
+const NumMailboxes = 1 << 20
 
-const NumQueries = 100
+const NumQueries = 1
 
 func TestMessageEncode(t *testing.T) {
 	group, _ := DefaultSetup()
@@ -221,7 +221,7 @@ func BenchmarkClientAuthWrite(b *testing.B) {
 			false)
 
 		sA.Boxes.ProofParams.VerifyAudit(pubVerificationShareA, privVerificationShareA)
-		// sA.WriteShare()
+		sA.WriteShare()
 	}
 
 }
@@ -266,4 +266,21 @@ func getSizeInBytes(s interface{}) int64 {
 	}
 
 	return int64(len(b.Bytes()))
+}
+
+func BenchmarkAuditTime(b *testing.B) {
+
+	group, _ := DefaultSetup()
+
+	pp := sposs.NewPublicParams(group)
+
+	x := pp.ExpField.RandomElement().Int
+
+	message := make([]byte, mSize)
+	rand.Read(message)
+	c := NewClient(pp, x, mSize, message)
+
+	for i := 0; i < b.N; i++ {
+		c.ProofPP.GenProof(c.ProofPP.ExpField.NewElement(x))
+	}
 }
